@@ -1,0 +1,57 @@
+LOAD CSV WITH HEADERS FROM 'file:///ethereum/data/transactions/v0.csv' AS row
+FIELDTERMINATOR ','
+CREATE (u1:User {pk: row.f_address})-[:SENDS]->(u2:User {pk: row.to_address})
+ON CREATE SET u1.surname = 'Taylor'
+
+MATCH (n {pk: '0x2ec1ad9c99e194e66c992b2093dc20df3f68617c'})
+SET n.surname = 'Taylor'
+
+
+LOAD CSV WITH HEADERS FROM 'file:///ethereum/data/transactions/000000000001.csv' AS row FIELDTERMINATOR ';'
+MATCH (u1:User {pk:row.from_address})
+MATCH (u2:User {pk:row.to_address})
+MERGE (u1)-[:SENDS {value:row.value}]->(u2)
+
+eip1559
+
+LOAD CSV WITH HEADERS FROM 'file:///ethereum/data/transactions/v0.csv' AS row
+FIELDTERMINATOR ','
+CREATE (u1:User {pk: row.f_address})-[:SENDS {value:row.value, nonce:row.nonce, timestamp:row.block_timestamp, gasprice: row.gas_price,gas : row.gas, receipt_cumulative_gas_used : row.receipt_cumulative_gas_used, receipt_gas_used :row.receipt_gas_used , transaction_type: row.transaction_type, receipt_effective_gas_price : row.receipt_effective_gas_price}]->(u2:User {pk: row.to_address})
+
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM 'file:///ethereum/data/transactions/v0.csv' AS csv
+FIELDTERMINATOR ','
+MERGE (u:User {pk:csv.f_address})
+
+match (node:Entity) where node.pk= '0x854f1269b659a727a2268ab86ff77cfb30bfb358'
+match p=(node)-[:TRANSFERRED*1..1]-(n2)
+RETURN p
+
+
+
+Juste entre 2 entités
+
+match (node:Entity) where node.pk= '0x1e1d82a2c4907cfbe95a6524376faf77e676bbf5'
+match p=(node)-[:TRANSFERRED]-(n2)
+WHERE n2.pk='0xa0d128a28f3bc2441c4f76f0a8f394b6460473c1'
+RETURN p
+
+
+
+
+MATCH path = (start:Entity {pk:'0x854f1269b659a727a2268ab86ff77cfb30bfb358'})-[:TRANSFERRED*1..2]->(end:Entity {pk:'0xd23f7594185a26d4860fdedd2b759fb0eba6058d'})
+RETURN count(path) as paths
+
+
+match (node:Entity) where node.pk= '0x854f1269b659a727a2268ab86ff77cfb30bfb358'
+match p=(node)-[:TRANSFERRED*1..2]-(n2)
+where n2.pk = '0xd23f7594185a26d4860fdedd2b759fb0eba6058d'
+RETURN p
+
+0x21a31ee1afc51d94c2efccaa2092ad1028285549 -> Binance
+
+
+MATCH (e:Entity)-[r:TRANSFERRED]->(b:Entity)
+WHERE date(left(r.timestamp,10)) <= date('2022-12-01')
+AND b.pk='0x4976a4a02f38326660d17bf34b431dc6e2eb2327'
+return e,b
